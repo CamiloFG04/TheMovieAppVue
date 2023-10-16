@@ -36,3 +36,41 @@ export const createSession = async(_,request_token) => {
         return error.response.data
     }  
 }
+
+export const account = async({commit},session_id) => {
+    try {
+        const {data} = await tmdbApi.get(`/account`,{
+            params: {
+                session_id
+            }
+        })
+        commit('user',data)
+        return data;
+    } catch (error) {
+        return error.response.data
+    }  
+}
+
+export const checkAuthentication = async ({commit}) => {
+    const session_id = localStorage.getItem('session_id')
+
+    if (!session_id) {
+        commit('logout')
+        return {ok:false, message:'Not authorized'}
+    }
+    try {
+        const {data} = await tmdbApi.get(`/account`,{
+            params: {
+                session_id
+            }
+        })
+
+        commit('user',data)
+
+        return {ok:true, message:'Authorized'}
+
+    } catch (error) {
+        commit('logout')
+        return {ok:false, message:'Not authorized'}
+    }
+}
